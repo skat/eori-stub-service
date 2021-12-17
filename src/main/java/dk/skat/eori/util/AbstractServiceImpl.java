@@ -1,6 +1,8 @@
 package dk.skat.eori.util;
 
 
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
@@ -43,10 +45,17 @@ public abstract class AbstractServiceImpl {
     }
     
     
-    protected void addHovedOplysningerSvar1(Object output, Object outDoc,String økonomiskOperatørEORINummer) {
+    protected void addHovedOplysningerSvar1(Object output, Object outDoc,String økonomiskOperatørEORINummer,List<String> listOfErrorCVRs) {
     	if (OPU.get(output, "kontekst") == null) {
     		OPS.seti(output, "kontekst.any", null);
     	}
-		RequestHelper.addHovedOplysningerSvar1(OPU.get(output, "kontekst"), outDoc,økonomiskOperatørEORINummer);
+		RequestHelper.addHovedOplysningerSvar1(OPU.get(output, "kontekst"), outDoc,økonomiskOperatørEORINummer,listOfErrorCVRs);
+    }
+    
+    protected void addHovedOplysningerSvarValider(Object output, Object outDoc,String økonomiskOperatørEORINummer,List<String> listOfErrorCVRs) {
+    	if (OPU.get(output, "kontekst") == null) {
+    		OPS.seti(output, "kontekst.any", null);
+    	}
+		RequestHelper.addHovedOplysningerSvarValider(OPU.get(output, "kontekst"), outDoc,økonomiskOperatørEORINummer,listOfErrorCVRs);
     }
 }

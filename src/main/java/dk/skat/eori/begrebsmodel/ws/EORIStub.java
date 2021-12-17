@@ -1,5 +1,6 @@
 package dk.skat.eori.begrebsmodel.ws;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -15,7 +16,6 @@ import dk.skat.begrebsmodel._2009._01._15.EORIVirksomhedSamlingHentO;
 import dk.skat.begrebsmodel._2009._01._15.EORIVirksomhedSamlingHentOType.EORIVirksomhedSamling;
 import dk.skat.begrebsmodel._2009._01._15.EORIVirksomhedSamlingHentOType.EORIVirksomhedSamling.EORIVirksomhed;
 import dk.skat.begrebsmodel._2009._01._15.EORIVirksomhedSamlingHentOType.EORIVirksomhedSamling.EORIVirksomhed.EORIKontaktOplysningSamling;
-//import dk.skat.begrebsmodel._2009._01._15.EORIVirksomhedSamlingHentOType.EORIVirksomhedSamling.EORIVirksomhed.GyldigAEO;
 import dk.skat.begrebsmodel._2009._01._15.EORIVirksomhedSamlingHentOType.EORIVirksomhedSamling.EORIVirksomhed.ØkonomiskOperatørTredjeLandNummerStrukturListe;
 import dk.skat.begrebsmodel._2009._01._15.EORIVirksomhedSamlingHentServicePortType;
 import dk.skat.begrebsmodel._2009._01._15.KompenserTransSvarType;
@@ -27,9 +27,9 @@ import dk.skat.begrebsmodel._2009._01._15.ØkonomiskOperatørTredjeLandNummerStr
 import dk.skat.eori.dao.EORIServiceDAO;
 import dk.skat.eori.dto.EORIVirkWhitelist;
 import dk.skat.eori.mapper.AdresseStrukturMapping;
-//import dk.skat.eori.mapper.AutoriseretØkonomiskOperatørStrukturMapping;
 import dk.skat.eori.mapper.EUMomsNummerMapping;
 import dk.skat.eori.util.AbstractServiceImpl;
+import dk.skat.eori.util.Constants;
 import dk.skat.eori.util.DateUtil;
 import dk.skat.eori.util.RequestHelper;
 
@@ -37,13 +37,11 @@ import dk.skat.eori.util.RequestHelper;
 public class EORIStub extends AbstractServiceImpl implements EORIVirksomhedSamlingHentServicePortType {
 
 	protected ObjectFactory objectFactory = new ObjectFactory();
-
 	private static final Log log = LogFactory.getLog(EORIStub.class);
 
 	public EORIVirksomhedSamlingHentO getEORIVirksomhedSamlingHent(EORIVirksomhedSamlingHentI request) {
 
 		List<String> økonomiskOperatørEORINummerList = request.getEORINummerSamling().getØkonomiskOperatørEORINummer();
-		//removeDuplicates(økonomiskOperatørEORINummerList);
 		request.getKontekst();
 		
 		Set<String> eoriSet = new HashSet<String>();
@@ -58,12 +56,12 @@ public class EORIStub extends AbstractServiceImpl implements EORIVirksomhedSamli
 
 		LandIdentifikationValg landIdentifikationValg = objectFactory.createØkonomiskOperatørTredjeLandNummerStrukturTypeLandIdentifikationValg();
 		EORIKontaktOplysningSamling eoriKontaktOplysningSamling = objectFactory.createEORIVirksomhedSamlingHentOTypeEORIVirksomhedSamlingEORIVirksomhedEORIKontaktOplysningSamling();
-		//GyldigAEO gyldigAEO = objectFactory.createEORIVirksomhedSamlingHentOTypeEORIVirksomhedSamlingEORIVirksomhedGyldigAEO();
 		KontekstType kontekstType = objectFactory.createKontekstType();
 		EORIServiceDAO eoriService = new EORIServiceDAO();
+		
+		List<String> listOfErrorCVRs = new ArrayList<String>();;
 
 		for (String økonomiskOperatørEORINummer : økonomiskOperatørEORINummerList) {
-			
 			
 			EORIVirkWhitelist eoriVirkWhitelist = new EORIVirkWhitelist();
 			
@@ -73,7 +71,7 @@ public class EORIStub extends AbstractServiceImpl implements EORIVirksomhedSamli
 			ØkonomiskOperatørTredjeLandNummerStrukturType økonomiskOperatørTredjeLandNummerStruktur = objectFactory.createØkonomiskOperatørTredjeLandNummerStrukturType();
 
 
-			if("FI".equals(økonomiskOperatørEORINummer.substring(0,2))) {
+			if(Constants.FINLAND_CVR_PREFIX.equals(økonomiskOperatørEORINummer.substring(0,2))) {
 				log.info("%%%%%%%%%%%%%%%%%%%%%%%%%%% Finland EORI Number Found %%%%%%%%%%%%%%%%%%--->"+økonomiskOperatørEORINummer);
 				eoriVirkWhitelist = eoriService.getEORINumber(økonomiskOperatørEORINummer);
 			} else {
@@ -85,7 +83,7 @@ public class EORIStub extends AbstractServiceImpl implements EORIVirksomhedSamli
 				log.info("---------- EORIStubService Called - EORI Number Found - Begin ------------------------");
 				log.info("---------- Given EORI Number   --------------->" + eoriVirkWhitelist.getEoriNumber());
 
-				if("FI".equals(økonomiskOperatørEORINummer.substring(0,2))) {
+				if(Constants.FINLAND_CVR_PREFIX.equals(økonomiskOperatørEORINummer.substring(0,2))) {
 					eoriVirksomhed.setØkonomiskOperatørEORINummer( eoriVirkWhitelist.getEoriNumber());
 				} else {
 					
@@ -94,7 +92,7 @@ public class EORIStub extends AbstractServiceImpl implements EORIVirksomhedSamli
 				landIdentifikationValg.setLandKode(økonomiskOperatørEORINummer.substring(0,2));
 				økonomiskOperatørTredjeLandNummerStruktur.setLandIdentifikationValg(landIdentifikationValg);
 				økonomiskOperatørTredjeLandNummerStrukturListe.getØkonomiskOperatørTredjeLandNummerStruktur().add(økonomiskOperatørTredjeLandNummerStruktur);
-				if("FI".equals(økonomiskOperatørEORINummer.substring(0,2))) {
+				if(Constants.FINLAND_CVR_PREFIX.equals(økonomiskOperatørEORINummer.substring(0,2))) {
 					økonomiskOperatørTredjeLandNummerStruktur.setØkonomiskOperatørTredjeLandNummer(eoriVirkWhitelist.getEoriNumber());
 
 				} else {
@@ -111,9 +109,6 @@ public class EORIStub extends AbstractServiceImpl implements EORIVirksomhedSamli
 				eoriVirksomhed.setEORIAdresseStruktur(AdresseStrukturMapping.mapAdresseStruktur(eoriVirkWhitelist,økonomiskOperatørEORINummer));
 				eoriVirksomhed.setEUMomsNummerSamling(EUMomsNummerMapping.mapEUMomsNummerSamling());
 				eoriVirksomhed.setEORIKontaktOplysningSamling(eoriKontaktOplysningSamling);
-				//gyldigAEO.setAutoriseretØkonomiskOperatørStruktur(AutoriseretØkonomiskOperatørStrukturMapping.mapØkonomiskOperatørStruktur());
-
-				//eoriVirksomhed.setGyldigAEO(gyldigAEO);
 				eoriVirksomhedSamling.getEORIVirksomhed().add(eoriVirksomhed);
 				eoriVirksomhedSamlingHentO.setKontekst(kontekstType);
 				eoriVirksomhedSamlingHentO.setEORIVirksomhedSamling(eoriVirksomhedSamling);
@@ -121,38 +116,33 @@ public class EORIStub extends AbstractServiceImpl implements EORIVirksomhedSamli
 
 				addHovedOplysningerSvar(eoriVirksomhedSamlingHentO, eoriVirksomhedSamling);
 
-			} else {
-
+			} 
+			
+			if (eoriVirkWhitelist.getEoriNumber().length() == 0) {
 				log.info("################# EORIStubService Called - EORI Number NOT Found - Begin ######");
-				//for (String økonomiskOperatørEORINumber : økonomiskOperatørEORINummerList) {
-				log.info("############      Given EORI Number    ############--->" + økonomiskOperatørEORINummer);
-				//}
-
-				Object outDoc = null;
-				eoriVirksomhedSamlingHentO.setKontekst(kontekstType);
-				outDoc = RequestHelper.svarReaktionTemplate;
-				RequestHelper.setOutputErrorDocument(outDoc);
-				outDoc = RequestHelper.getOutputErrorDocument();
-				eoriVirksomhedSamlingHentO.setEORIVirksomhedSamling(eoriVirksomhedSamling);
-				addHovedOplysningerSvar1(eoriVirksomhedSamlingHentO, outDoc, økonomiskOperatørEORINummer);
+				log.info("********      Given EORI Number   ********--->" + økonomiskOperatørEORINummer);
+				listOfErrorCVRs.add(økonomiskOperatørEORINummer);
 				log.info("############ EORIStubService Called - EORI Number NOT Found - End ############");
 			}
 		}
+		
+		if(listOfErrorCVRs.size() > 0) {
+			Object outDoc = null;
+			outDoc = RequestHelper.svarReaktionTemplate;
+			RequestHelper.setOutputErrorDocument(outDoc);
+			outDoc = RequestHelper.getOutputErrorDocument();
+			eoriVirksomhedSamlingHentO.setKontekst(kontekstType);
+			eoriVirksomhedSamlingHentO.setEORIVirksomhedSamling(eoriVirksomhedSamling);
 
+			for(int i=0 ; i<listOfErrorCVRs.size() ; i++) {
+				addHovedOplysningerSvar1(eoriVirksomhedSamlingHentO, outDoc, listOfErrorCVRs.get(i),listOfErrorCVRs);
+			}
+		}
 		return eoriVirksomhedSamlingHentO;
 	}
 
 	public KompenserTransSvarType getKompenserTrans(KompenserTransType request) {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
-	/*private static List<String> removeDuplicates(List<String> økonomiskOperatørEORINumberList) {
-		
-				Set<String> eoriSet = new HashSet<String>();
-				eoriSet.addAll(økonomiskOperatørEORINumberList);
-				økonomiskOperatørEORINumberList.clear();
-				økonomiskOperatørEORINumberList.addAll(eoriSet);
-				return økonomiskOperatørEORINumberList;
-	}*/
+	
 }
